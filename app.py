@@ -2,7 +2,7 @@ import streamlit as st
 import cv2
 import numpy as np
 
-def count_insects(image, min_contour_area=200):
+def count_insects(image, min_contour_area=200, min_width=10, min_height=10):
     # グレースケールに変換
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     
@@ -22,15 +22,15 @@ def count_insects(image, min_contour_area=200):
         area = cv2.contourArea(contour)
         if min_contour_area < area:
             x, y, w, h = cv2.boundingRect(contour)
-            bounding_boxes.append((x, y, x + w, y + h))
-            # 輪郭を描画（追加）
-            cv2.drawContours(result_image, [contour], -1, (0, 255, 0), 2)
-            cv2.putText(result_image, f'{w}x{h}', (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
-            insect_count += 1
+            if w > min_width and h > min_height:
+                bounding_boxes.append((x, y, x + w, y + h))
+                # 輪郭を描画
+                cv2.drawContours(result_image, [contour], -1, (0, 255, 0), 2)
+                cv2.putText(result_image, f'{w}x{h}', (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+                insect_count += 1
     
     return result_image, insect_count
 
-# merge_boxes, overlap_ratio などの関数はそのまま利用します
 
 def main():
     st.title("昆虫カウンター")
