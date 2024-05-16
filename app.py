@@ -29,22 +29,15 @@ def count_insects(image, min_contour_area=200):
 
     # 結合されたボックスを描画
     for box in merged_boxes:
-        # 斜めに描画するための回転角度を指定
-        angle_deg = 30  # 任意の角度を設定
-        angle_rad = np.radians(angle_deg)
-        center = ((box[0] + box[2]) // 2, (box[1] + box[3]) // 2)
-        size = (box[2] - box[0], box[3] - box[1])
-        rotation_matrix = cv2.getRotationMatrix2D(center, angle_deg, 1)
-        rotated_box = cv2.transform(np.array([box]), rotation_matrix)[0][0]
-
+        x1, y1, x2, y2 = box
         # 長方形のサイズを少し小さくする
-        margin = 1  # 任意のマージンを設定
-        rotated_box[0] += margin
-        rotated_box[1] += margin
-        rotated_box[2] -= margin
-        rotated_box[3] -= margin
-        cv2.rectangle(result_image, (rotated_box[0], rotated_box[1]), (rotated_box[2], rotated_box[3]), (0, 255, 0), 2)
-        cv2.putText(result_image, f'{rotated_box[2] - rotated_box[0]}x{rotated_box[3] - rotated_box[1]}', (rotated_box[0], rotated_box[1] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+        margin = 10  # 任意のマージンを設定
+        x1 += margin
+        y1 += margin
+        x2 -= margin
+        y2 -= margin
+        cv2.rectangle(result_image, (x1, y1), (x2, y2), (0, 255, 0), 2)
+        cv2.putText(result_image, f'{x2 - x1}x{y2 - y1}', (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
         insect_count += 1
 
     return result_image, insect_count
