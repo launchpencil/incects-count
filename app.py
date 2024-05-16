@@ -45,7 +45,7 @@ def merge_ellipses(ellipses, overlap_threshold=0.2):
     for ellipse in ellipses:
         found_overlap = False
         for idx, merged_ellipse in enumerate(merged_ellipses):
-            if overlap_ratio(ellipse, merged_ellipse) > overlap_threshold:
+            if overlap_ratio(ellipse, merged_ellipse, overlap_threshold):  # Pass overlap_threshold as an argument
                 merged_ellipses[idx] = merge_ellipse(ellipse, merged_ellipse)
                 found_overlap = True
                 break
@@ -53,7 +53,7 @@ def merge_ellipses(ellipses, overlap_threshold=0.2):
             merged_ellipses.append(ellipse)
     return merged_ellipses
 
-def overlap_ratio(ellipse1, ellipse2):
+def overlap_ratio(ellipse1, ellipse2, overlap_threshold):  # Add overlap_threshold as an argument
     intersect_area = np.pi * ellipse1[1][0] * ellipse1[1][1] * overlap_ratio(ellipse2[1][0] * ellipse2[1][1])
     area1 = np.pi * ellipse1[1][0] * ellipse1[1][1]
     area2 = np.pi * ellipse2[1][0] * ellipse2[1][1]
