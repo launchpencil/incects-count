@@ -8,7 +8,7 @@ def count_insects(image):
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     
     # 2値化
-    _, binary = cv2.threshold(gray, 150, 255, cv2.THRESH_BINARY_INV)
+    _, binary = cv2.threshold(gray, 100, 255, cv2.THRESH_BINARY_INV)
     
     # 輪郭を抽出
     contours, _ = cv2.findContours(binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
