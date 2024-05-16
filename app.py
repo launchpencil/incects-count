@@ -20,8 +20,11 @@ def count_insects(image):
     # 輪郭を描画
     result_image = image.copy()
     for contour in contours:
-        x, y, w, h = cv2.boundingRect(contour)
-        cv2.rectangle(result_image, (x, y), (x + w, y + h), (0, 255, 0), 2)
+        area = cv2.contourArea(contour)
+        if area > 50:  # 例：面積が50ピクセルより大きい輪郭を保持
+            valid_contours.append(contour)
+            x, y, w, h = cv2.boundingRect(contour)
+            cv2.rectangle(result_image, (x, y), (x + w, y + h), (0, 255, 0), 2)
     
     # 虫の数を数える
     insect_count = len(contours)
