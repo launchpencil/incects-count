@@ -31,7 +31,7 @@ def count_insects(image, min_contour_area=200):
     for box in merged_boxes:
         x1, y1, x2, y2 = box
         # 長方形のサイズを少し小さくする
-        margin = 10  # 任意のマージンを設定
+        margin = 1  # 任意のマージンを設定
         x1 += margin
         y1 += margin
         x2 -= margin
