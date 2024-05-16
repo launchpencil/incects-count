@@ -12,19 +12,59 @@ def count_insects(image, min_contour_area=200):
     # Contour detection using ellipses
     contours, _ = cv2.findContours(binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
-    # Draw contours as ellipses and count them
+    # Draw contours as ellipses, display size, and merge overlapping ellipses
     result_image = image.copy()
     insect_count = 0
 
+    bounding_boxes = []
     for contour in contours:
         area = cv2.contourArea(contour)
         if min_contour_area < area:
             # Fit an ellipse to the contour
             ellipse = cv2.fitEllipse(contour)
             cv2.ellipse(result_image, ellipse, (0, 255, 0), 2)
-            insect_count += 1
+
+            # Display size of ellipse
+            (x, y), (MA, ma), angle = ellipse
+            size_text = f'{int(MA)}x{int(ma)}'
+            cv2.putText(result_image, size_text, (int(x), int(y - 10)), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+
+            bounding_boxes.append(ellipse)
+
+    # Merge overlapping ellipses
+    merged_boxes = merge_ellipses(bounding_boxes)
+
+    for box in merged_boxes:
+        (x, y), (MA, ma), angle = box
+        cv2.ellipse(result_image, box, (0, 255, 0), 2)
+        insect_count += 1
 
     return result_image, insect_count
+
+def merge_ellipses(ellipses, overlap_threshold=0.2):
+    merged_ellipses = []
+    for ellipse in ellipses:
+        found_overlap = False
+        for idx, merged_ellipse in enumerate(merged_ellipses):
+            if overlap_ratio(ellipse, merged_ellipse) > overlap_threshold:
+                merged_ellipses[idx] = (
+                    (ellipse[0][0] + merged_ellipse[0][0]) / 2,
+                    (ellipse[0][1] + merged_ellipse[0][1]) / 2,
+                    (ellipse[1][0] + merged_ellipse[1][0]) / 2,
+                    (ellipse[1][1] + merged_ellipse[1][1]) / 2,
+                    (ellipse[2] + merged_ellipse[2]) / 2
+                )
+                found_overlap = True
+                break
+        if not found_overlap:
+            merged_ellipses.append(ellipse)
+    return merged_ellipses
+
+def overlap_ratio(ellipse1, ellipse2):
+    intersect_area = np.pi * ellipse1[1][0] * ellipse1[1][1] * overlap_ratio(ellipse2[1][0] * ellipse2[1][1])
+    area1 = np.pi * ellipse1[1][0] * ellipse1[1][1]
+    area2 = np.pi * ellipse2[1][0] * ellipse2[1][1]
+    return intersect_area / min(area1, area2)
 
 def main():
     st.title("昆虫カウンター")
