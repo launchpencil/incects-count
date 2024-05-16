@@ -31,7 +31,7 @@ def count_insects(image, min_contour_area=200):
     for box in merged_boxes:
         x1, y1, x2, y2 = box
         # 長方形のサイズを少し小さくする
-        margin = 10  # 任意のマージンを設定
+        margin = 1  # 任意のマージンを設定
         x1 += margin
         y1 += margin
         x2 -= margin
@@ -75,9 +75,9 @@ def overlap_ratio(box1, box2):
 
 def main():
     st.title("昆虫カウンター")
-    
+
     uploaded_file = st.file_uploader("画像ファイルをアップロードしてください", type=["jpg", "jpeg", "png"])
-    
+
     if uploaded_file is not None:
         image = np.array(bytearray(uploaded_file.read()), dtype=np.uint8)
         image = cv2.imdecode(image, cv2.IMREAD_COLOR)
