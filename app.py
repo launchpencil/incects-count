@@ -2,7 +2,7 @@ import streamlit as st
 import cv2
 import numpy as np
 
-def count_insects(image, min_contour_area=200):
+def count_insects(image, min_contour_area=200, max_box_size=(300, 300)):
     # グレースケールに変換
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     
@@ -22,6 +22,12 @@ def count_insects(image, min_contour_area=200):
         area = cv2.contourArea(contour)
         if min_contour_area < area:
             x, y, w, h = cv2.boundingRect(contour)
+            # ボックスのサイズが大きい場合は調整
+            if w > max_box_size[0] or h > max_box_size[1]:
+                scale_factor_w = min(max_box_size[0] / w, 1.0)
+                scale_factor_h = min(max_box_size[1] / h, 1.0)
+                w = int(w * scale_factor_w)
+                h = int(h * scale_factor_h)
             bounding_boxes.append((x, y, x + w, y + h))
     
     # 重複するボックスを結合
@@ -30,12 +36,6 @@ def count_insects(image, min_contour_area=200):
     # 結合されたボックスを描画
     for box in merged_boxes:
         x1, y1, x2, y2 = box
-        # 長方形のサイズを少し小さくする
-        margin = 20  # 任意のマージンを設定
-        x1 += margin
-        y1 += margin
-        x2 -= margin
-        y2 -= margin
         cv2.rectangle(result_image, (x1, y1), (x2, y2), (0, 255, 0), 2)
         cv2.putText(result_image, f'{x2 - x1}x{y2 - y1}', (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
         insect_count += 1
