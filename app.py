@@ -18,7 +18,7 @@ def count_insects(image, min_contour_area=100):
     insect_count = 0
     for contour in contours:
         area = cv2.contourArea(contour)
-        if min_contour_area < area < max_contour_area:
+        if min_contour_area < area:
             x, y, w, h = cv2.boundingRect(contour)
             cv2.rectangle(result_image, (x, y), (x + w, y + h), (0, 255, 0), 2)
             insect_count += 1
