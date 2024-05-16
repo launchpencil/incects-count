@@ -21,17 +21,16 @@ def count_insects(image, min_contour_area=200):
     for contour in contours:
         area = cv2.contourArea(contour)
         if min_contour_area < area:
-            x, y, w, h = cv2.boundingRect(contour)
-            bounding_boxes.append((x, y, x + w, y + h))
+            # 楕円を近似
+            ellipse = cv2.fitEllipse(contour)
+            bounding_boxes.append(ellipse)
 
     # 重複するボックスを結合
     merged_boxes = merge_boxes(bounding_boxes)
 
     # 結合されたボックスを描画
     for box in merged_boxes:
-        x1, y1, x2, y2 = box
-        cv2.rectangle(result_image, (x1, y1), (x2, y2), (0, 255, 0), 2)
-        cv2.putText(result_image, f'{x2 - x1}x{y2 - y1}', (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+        cv2.ellipse(result_image, box, (0, 255, 0), 2)
         insect_count += 1
 
     return result_image, insect_count
@@ -40,32 +39,32 @@ def merge_boxes(boxes, overlap_threshold=0.2):
     # ボックスの結合
     merged_boxes = []
     for box in boxes:
-        x1, y1, x2, y2 = box
         found_overlap = False
         for idx, merged_box in enumerate(merged_boxes):
-            x1_m, y1_m, x2_m, y2_m = merged_box
             # 重複する場合は結合する
-            if overlap_ratio((x1, y1, x2, y2), (x1_m, y1_m, x2_m, y2_m)) > overlap_threshold:
-                merged_boxes[idx] = (
-                    min(x1, x1_m),
-                    min(y1, y1_m),
-                    max(x2, x2_m),
-                    max(y2, y2_m)
-                )
+            if overlap_ratio(box, merged_box) > overlap_threshold:
+                merged_boxes[idx] = merge_ellipses(box, merged_box)
                 found_overlap = True
                 break
         if not found_overlap:
-            merged_boxes.append((x1, y1, x2, y2))
+            merged_boxes.append(box)
     return merged_boxes
 
 def overlap_ratio(box1, box2):
     # 重複する面積の割合を計算
-    x1_1, y1_1, x2_1, y2_1 = box1
-    x1_2, y1_2, x2_2, y2_2 = box2
-    intersect_area = max(0, min(x2_1, x2_2) - max(x1_1, x1_2)) * max(0, min(y2_1, y2_2) - max(y1_1, y1_2))
-    area1 = (x2_1 - x1_1) * (y2_1 - y1_1)
-    area2 = (x2_2 - x1_2) * (y2_2 - y1_2)
+    area1 = np.pi * box1[1][0] * box1[1][1]
+    area2 = np.pi * box2[1][0] * box2[1][1]
+    intersect_area = cv2.rotatedRectangleIntersection(box1, box2)[1]
     return intersect_area / min(area1, area2)
+
+def merge_ellipses(box1, box2):
+    # 楕円を結合する
+    center1, axes1, angle1 = box1
+    center2, axes2, angle2 = box2
+    new_center = ((center1[0] + center2[0]) / 2, (center1[1] + center2[1]) / 2)
+    new_axes = ((axes1[0] + axes2[0]) / 2, (axes1[1] + axes2[1]) / 2)
+    new_angle = (angle1 + angle2) / 2
+    return new_center, new_axes, new_angle
 
 def main():
     st.title("昆虫カウンター")
