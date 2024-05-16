@@ -48,12 +48,6 @@ def merge_boxes(boxes, overlap_threshold=0.2):
     for box in boxes:
         x1, y1, x2, y2 = box
         found_overlap = False
-        # ボックスを縮小
-        margin = 5  # 任意のマージンを設定
-        x1 -= margin
-        y1 -= margin
-        x2 += margin
-        y2 += margin
         for idx, merged_box in enumerate(merged_boxes):
             x1_m, y1_m, x2_m, y2_m = merged_box
             # 重複する場合は結合する
