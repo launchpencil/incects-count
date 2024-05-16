@@ -7,29 +7,32 @@ def count_insects(image):
     # グレースケールに変換
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
-      
-    # 閾値処理を追加
-    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    _, binary = cv2.threshold(gray, 140, 255, cv2.THRESH_BINARY_INV)
+    # 画像の平滑化（ガウシアンブラー）
+    blurred = cv2.GaussianBlur(gray, (5, 5), 0)
 
-    st.image(gray)
-    
-    # 輪郭を抽出
-    contours, _ = cv2.findContours(binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_TC89_L1)
-    
-    # 輪郭を描画
+    # 適応的閾値処理（パラメータ調整）
+    binary = cv2.adaptiveThreshold(blurred, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY_INV, 21, 7)
+
+    st.image(binary, caption='閾値処理された画像', use_column_width=True)
+
+    # 輪郭の抽出
+    contours, _ = cv2.findContours(binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+    # 輪郭の周囲に矩形を描画し、小さな領域を除去
     result_image = image.copy()
+    valid_contours = []
     for contour in contours:
         area = cv2.contourArea(contour)
         if area > 50:  # 例：面積が50ピクセルより大きい輪郭を保持
             valid_contours.append(contour)
             x, y, w, h = cv2.boundingRect(contour)
             cv2.rectangle(result_image, (x, y), (x + w, y + h), (0, 255, 0), 2)
-    
-    # 虫の数を数える
-    insect_count = len(contours)
-    
+
+    # 昆虫の数を数える
+    insect_count = len(valid_contours)
+
     return result_image, insect_count
+
 
 def main():
     st.title("昆虫数を数えるアプリ")
