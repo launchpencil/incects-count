@@ -23,14 +23,18 @@ def count_insects(image, min_contour_area=200):
     # 輪郭を描画
     result_image = image.copy()
     insect_count = 0
-    for contour in cleaned_contours:
-        x, y, w, h = cv2.boundingRect(contour)
-        cv2.rectangle(result_image, (x, y), (x + w, y + h), (0, 255, 0), 2)
-        
-        # 長方形の大きさを描画
-        cv2.putText(result_image, f'{w}x{h}', (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
-        
-        insect_count += 1
+    for contour in contours:
+        area = cv2.contourArea(contour)
+        if min_contour_area < area:
+            x, y, w, h = cv2.boundingRect(contour)
+            cv2.rectangle(result_image, (x, y), (x + w, y + h), (0, 255, 0), 2)
+            
+            # 長方形の大きさを描画
+            cv2.putText(result_image, f'{w}x{h}', (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+            
+            # 大きな枠の中に小さな枠が完全に含まれている場合は除外する
+            if area > min_contour_area * 2:  # サイズが2倍以上の場合
+                insect_count += 1
     
     return result_image, insect_count
 
