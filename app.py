@@ -29,63 +29,27 @@ def count_insects(image, min_contour_area=200):
 
     # 結合されたボックスを描画
     for box in merged_boxes:
-        x1, y1, x2, y2 = box
+        # 斜めに描画するための回転角度を指定
+        angle_deg = 30  # 任意の角度を設定
+        angle_rad = np.radians(angle_deg)
+        center = ((box[0] + box[2]) // 2, (box[1] + box[3]) // 2)
+        size = (box[2] - box[0], box[3] - box[1])
+        rotation_matrix = cv2.getRotationMatrix2D(center, angle_deg, 1)
+        rotated_box = cv2.transform(np.array([box]), rotation_matrix)[0][0]
+
         # 長方形のサイズを少し小さくする
         margin = 1  # 任意のマージンを設定
-        x1 += margin
-        y1 += margin
-        x2 -= margin
-        y2 -= margin
-        cv2.rectangle(result_image, (x1, y1), (x2, y2), (0, 255, 0), 2)
-        cv2.putText(result_image, f'{x2 - x1}x{y2 - y1}', (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+        rotated_box[0] += margin
+        rotated_box[1] += margin
+        rotated_box[2] -= margin
+        rotated_box[3] -= margin
+        cv2.rectangle(result_image, (rotated_box[0], rotated_box[1]), (rotated_box[2], rotated_box[3]), (0, 255, 0), 2)
+        cv2.putText(result_image, f'{rotated_box[2] - rotated_box[0]}x{rotated_box[3] - rotated_box[1]}', (rotated_box[0], rotated_box[1] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
         insect_count += 1
 
     return result_image, insect_count
 
-def merge_boxes(boxes, overlap_threshold=0.2):
-    # ボックスの結合
-    merged_boxes = []
-    for box in boxes:
-        x1, y1, x2, y2 = box
-        found_overlap = False
-        for idx, merged_box in enumerate(merged_boxes):
-            x1_m, y1_m, x2_m, y2_m = merged_box
-            # 重複する場合は結合する
-            if overlap_ratio((x1, y1, x2, y2), (x1_m, y1_m, x2_m, y2_m)) > overlap_threshold:
-                merged_boxes[idx] = (
-                    min(x1, x1_m),
-                    min(y1, y1_m),
-                    max(x2, x2_m),
-                    max(y2, y2_m)
-                )
-                found_overlap = True
-                break
-        if not found_overlap:
-            merged_boxes.append((x1, y1, x2, y2))
-    return merged_boxes
-
-def overlap_ratio(box1, box2):
-    # 重複する面積の割合を計算
-    x1_1, y1_1, x2_1, y2_1 = box1
-    x1_2, y1_2, x2_2, y2_2 = box2
-    intersect_area = max(0, min(x2_1, x2_2) - max(x1_1, x1_2)) * max(0, min(y2_1, y2_2) - max(y1_1, y1_2))
-    area1 = (x2_1 - x1_1) * (y2_1 - y1_1)
-    area2 = (x2_2 - x1_2) * (y2_2 - y1_2)
-    return intersect_area / min(area1, area2)
-
-def main():
-    st.title("昆虫カウンター")
-    
-    uploaded_file = st.file_uploader("画像ファイルをアップロードしてください", type=["jpg", "jpeg", "png"])
-    
-    if uploaded_file is not None:
-        image = np.array(bytearray(uploaded_file.read()), dtype=np.uint8)
-        image = cv2.imdecode(image, cv2.IMREAD_COLOR)
-        st.image(image, caption='アップロードされた画像', use_column_width=True)
-        
-        result_image, insect_count = count_insects(image)
-        st.image(result_image, caption='結果画像', use_column_width=True)
-        st.write(f"昆虫の数: {insect_count}")
+# 他の関数とmain()関数は省略
 
 if __name__ == "__main__":
     main()
