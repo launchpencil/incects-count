@@ -1,8 +1,9 @@
 import streamlit as st
 import cv2
 import numpy as np
+from io import BytesIO
 
-def count_insects(image, min_contour_area=200):
+def count_insects(image, min_contour_area=120):
     # グレースケールに変換
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     
@@ -30,6 +31,8 @@ def count_insects(image, min_contour_area=200):
     # 結合されたボックスを描画
     for box in merged_boxes:
         x1, y1, x2, y2 = box
+        # 角を増やす
+        x1, y1, x2, y2 = expand_box(x1, y1, x2, y2, expand_ratio=0.1)
         cv2.rectangle(result_image, (x1, y1), (x2, y2), (0, 255, 0), 2)
         cv2.putText(result_image, f'{x2 - x1}x{y2 - y1}', (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
         insect_count += 1
@@ -67,8 +70,17 @@ def overlap_ratio(box1, box2):
     area2 = (x2_2 - x1_2) * (y2_2 - y1_2)
     return intersect_area / min(area1, area2)
 
+def expand_box(x1, y1, x2, y2, expand_ratio=0.1):
+    # ボックスを拡大する
+    w = x2 - x1
+    h = y2 - y1
+    expand_w = int(w * expand_ratio)
+    expand_h = int(h * expand_ratio)
+    return max(0, x1 - expand_w), max(0, y1 - expand_h), x2 + expand_w, y2 + expand_h
+
 def main():
-    st.title("昆虫カウンター")
+    st.title("昆虫数を数えるアプリ")
+    st.write("画像から昆虫の数を数える")
     
     uploaded_file = st.file_uploader("画像ファイルをアップロードしてください", type=["jpg", "jpeg", "png"])
     
