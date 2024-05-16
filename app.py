@@ -11,7 +11,7 @@ def count_insects(image):
     _, binary = cv2.threshold(gray, 150, 255, cv2.THRESH_BINARY_INV)
     
     # 輪郭を抽出
-    contours, _ = cv2.findContours(binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    contours, _ = cv2.findContours(binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
     
     # 輪郭を描画
     result_image = image.copy()
