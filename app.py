@@ -30,6 +30,12 @@ def count_insects(image, min_contour_area=200):
     # 結合されたボックスを描画
     for box in merged_boxes:
         x1, y1, x2, y2 = box
+        # 長方形のサイズを少し小さくする
+        margin = 5  # 任意のマージンを設定
+        x1 += margin
+        y1 += margin
+        x2 -= margin
+        y2 -= margin
         cv2.rectangle(result_image, (x1, y1), (x2, y2), (0, 255, 0), 2)
         cv2.putText(result_image, f'{x2 - x1}x{y2 - y1}', (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
         insect_count += 1
