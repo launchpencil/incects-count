@@ -35,7 +35,6 @@ def count_insects(image, min_contour_area=200):
     merged_boxes = merge_ellipses(bounding_boxes)
 
     for box in merged_boxes:
-        (x, y), (MA, ma), angle = box
         cv2.ellipse(result_image, box, (0, 255, 0), 2)
         insect_count += 1
 
@@ -47,13 +46,7 @@ def merge_ellipses(ellipses, overlap_threshold=0.2):
         found_overlap = False
         for idx, merged_ellipse in enumerate(merged_ellipses):
             if overlap_ratio(ellipse, merged_ellipse) > overlap_threshold:
-                merged_ellipses[idx] = (
-                    (ellipse[0][0] + merged_ellipse[0][0]) / 2,
-                    (ellipse[0][1] + merged_ellipse[0][1]) / 2,
-                    (ellipse[1][0] + merged_ellipse[1][0]) / 2,
-                    (ellipse[1][1] + merged_ellipse[1][1]) / 2,
-                    (ellipse[2] + merged_ellipse[2]) / 2
-                )
+                merged_ellipses[idx] = merge_ellipse(ellipse, merged_ellipse)
                 found_overlap = True
                 break
         if not found_overlap:
@@ -65,6 +58,12 @@ def overlap_ratio(ellipse1, ellipse2):
     area1 = np.pi * ellipse1[1][0] * ellipse1[1][1]
     area2 = np.pi * ellipse2[1][0] * ellipse2[1][1]
     return intersect_area / min(area1, area2)
+
+def merge_ellipse(ellipse1, ellipse2):
+    new_center = ((ellipse1[0][0] + ellipse2[0][0]) / 2, (ellipse1[0][1] + ellipse2[0][1]) / 2)
+    new_axes = ((ellipse1[1][0] + ellipse2[1][0]) / 2, (ellipse1[1][1] + ellipse2[1][1]) / 2)
+    new_angle = (ellipse1[2] + ellipse2[2]) / 2
+    return new_center, new_axes, new_angle
 
 def main():
     st.title("昆虫カウンター")
