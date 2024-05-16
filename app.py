@@ -27,7 +27,6 @@ def count_insects(image, min_contour_area=200):
     
     # 虫の数を数える
     insect_count = len(contours)
-    st.write(len(filtered_contours))
 
     result_image, insect_count = count_insects(image)
     st.write(f"昆虫の数: {insect_count}")
