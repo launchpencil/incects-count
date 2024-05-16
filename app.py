@@ -6,9 +6,13 @@ from io import BytesIO
 def count_insects(image):
     # グレースケールに変換
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    st.image(gray)
-    # 2値化
+
+      
+    # 閾値処理を追加
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     _, binary = cv2.threshold(gray, 140, 255, cv2.THRESH_BINARY_INV)
+
+    st.image(gray)
     
     # 輪郭を抽出
     contours, _ = cv2.findContours(binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_TC89_L1)
@@ -32,10 +36,6 @@ def main():
         image = np.array(bytearray(uploaded_file.read()), dtype=np.uint8)
         image = cv2.imdecode(image, cv2.IMREAD_COLOR)
         st.image(image, caption='アップロードされた画像', use_column_width=True)
-        
-        # 閾値処理を追加
-        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-        _, binary = cv2.threshold(gray, 140, 255, cv2.THRESH_BINARY_INV)
         
         result_image, insect_count = count_insects(image)
         st.image(result_image, caption='結果画像', use_column_width=True)
