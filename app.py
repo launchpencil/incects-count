@@ -6,12 +6,12 @@ from io import BytesIO
 def count_insects(image):
     # グレースケールに変換
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    
+    st.image(gray)
     # 2値化
     _, binary = cv2.threshold(gray, 140, 255, cv2.THRESH_BINARY_INV)
     
     # 輪郭を抽出
-    contours, _ = cv2.findContours(binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+    contours, _ = cv2.findContours(binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_TC89_L1)
     
     # 輪郭を描画
     result_image = image.copy()
