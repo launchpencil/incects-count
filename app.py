@@ -10,7 +10,7 @@ def count_insects(image, min_contour_area=200):
     _, binary = cv2.threshold(gray, 140, 255, cv2.THRESH_BINARY_INV)
     
     # 輪郭を抽出
-    contours, _ = cv2.findContours(binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_TC89_L1)
+    contours, _ = cv2.findContours(binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     
     # 輪郭を描画
     result_image = image.copy()
@@ -21,59 +21,12 @@ def count_insects(image, min_contour_area=200):
     for contour in contours:
         area = cv2.contourArea(contour)
         if min_contour_area < area:
-            x, y, w, h = cv2.boundingRect(contour)
-            bounding_boxes.append((x, y, x + w, y + h))
-    
-    # 重複するボックスを結合
-    merged_boxes = merge_boxes(bounding_boxes)
-    
-    # 結合されたボックスを描画
-    for box in merged_boxes:
-        x1, y1, x2, y2 = box
-        cv2.rectangle(result_image, (x1, y1), (x2, y2), (0, 255, 0), 2)
-        cv2.putText(result_image, f'{x2 - x1}x{y2 - y1}', (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
-        insect_count += 1
+            # 楕円を近似して描画
+            ellipse = cv2.fitEllipse(contour)
+            cv2.ellipse(result_image, ellipse, (0, 255, 0), 2)
+            insect_count += 1
     
     return result_image, insect_count
-
-def merge_boxes(boxes, area_threshold=0.2):
-    # Sort boxes based on area in descending order
-    boxes = sorted(boxes, key=lambda x: (x[2] - x[0]) * (x[3] - x[1]), reverse=True)
-    
-    merged_boxes = []
-    for box in boxes:
-        x1, y1, x2, y2 = box
-        merged = False
-        for m_box in merged_boxes:
-            mx1, my1, mx2, my2 = m_box
-            # Calculate overlap ratio based on area
-            overlap_area = max(0, min(x2, mx2) - max(x1, mx1)) * max(0, min(y2, my2) - max(y1, my1))
-            box_area = (x2 - x1) * (y2 - y1)
-            m_box_area = (mx2 - mx1) * (my2 - my1)
-            if overlap_area / min(box_area, m_box_area) > area_threshold:
-                merged_boxes.remove(m_box)
-                merged_boxes.append((
-                    min(x1, mx1),
-                    min(y1, my1),
-                    max(x2, mx2),
-                    max(y2, my2)
-                ))
-                merged = True
-                break
-        if not merged:
-            merged_boxes.append((x1, y1, x2, y2))
-    
-    return merged_boxes
-
-
-def overlap_ratio(box1, box2):
-    # 重複する面積の割合を計算
-    x1_1, y1_1, x2_1, y2_1 = box1
-    x1_2, y1_2, x2_2, y2_2 = box2
-    intersect_area = max(0, min(x2_1, x2_2) - max(x1_1, x1_2)) * max(0, min(y2_1, y2_2) - max(y1_1, y1_2))
-    area1 = (x2_1 - x1_1) * (y2_1 - y1_1)
-    area2 = (x2_2 - x1_2) * (y2_2 - y1_2)
-    return intersect_area / min(area1, area2)
 
 def main():
     st.title("昆虫カウンター")
