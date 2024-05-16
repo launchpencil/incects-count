@@ -3,7 +3,7 @@ import cv2
 import numpy as np
 from io import BytesIO
 
-def count_insects(image, min_contour_area=150):
+def count_insects(image, min_contour_area=155):
     # グレースケールに変換
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     
@@ -21,6 +21,10 @@ def count_insects(image, min_contour_area=150):
         if min_contour_area < area:
             x, y, w, h = cv2.boundingRect(contour)
             cv2.rectangle(result_image, (x, y), (x + w, y + h), (0, 255, 0), 2)
+            
+            # 長方形の大きさを描画
+            cv2.putText(result_image, f'{w}x{h}', (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+            
             insect_count += 1
     
     return result_image, insect_count
