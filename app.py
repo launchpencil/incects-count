@@ -1,7 +1,6 @@
 import streamlit as st
 import cv2
 import numpy as np
-from io import BytesIO
 
 def count_insects(image, min_contour_area=200):
     # グレースケールに変換
@@ -69,8 +68,7 @@ def overlap_ratio(box1, box2):
     return intersect_area / min(area1, area2)
 
 def main():
-    st.title("昆虫数を数えるアプリ")
-    st.write("画像から昆虫の数を数える")
+    st.title("昆虫カウンター")
     
     uploaded_file = st.file_uploader("画像ファイルをアップロードしてください", type=["jpg", "jpeg", "png"])
     
