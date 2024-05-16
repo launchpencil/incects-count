@@ -3,7 +3,7 @@ import cv2
 import numpy as np
 from io import BytesIO
 
-def count_insects(image, min_contour_area=150):
+def count_insects(image, min_contour_area=200):
     # グレースケールに変換
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     
