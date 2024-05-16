@@ -32,6 +32,11 @@ def main():
         image = np.array(bytearray(uploaded_file.read()), dtype=np.uint8)
         image = cv2.imdecode(image, cv2.IMREAD_COLOR)
         st.image(image, caption='アップロードされた画像', use_column_width=True)
+        
+        # 閾値処理を追加
+        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        _, binary = cv2.threshold(gray, 140, 255, cv2.THRESH_BINARY_INV)
+        
         result_image, insect_count = count_insects(image)
         st.image(result_image, caption='結果画像', use_column_width=True)
         st.write(f"昆虫の数: {insect_count}")
