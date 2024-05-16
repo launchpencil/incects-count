@@ -3,16 +3,12 @@ import cv2
 import numpy as np
 from io import BytesIO
 
-def count_insects(image):
+def count_insects(image, min_contour_area=100):
     # グレースケールに変換
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-
-      
+    
     # 閾値処理を追加
-    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     _, binary = cv2.threshold(gray, 140, 255, cv2.THRESH_BINARY_INV)
-
-    st.image(gray)
     
     # 輪郭を抽出
     contours, _ = cv2.findContours(binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_TC89_L1)
@@ -20,13 +16,20 @@ def count_insects(image):
     # 輪郭を描画
     result_image = image.copy()
     for contour in contours:
-        x, y, w, h = cv2.boundingRect(contour)
-        cv2.rectangle(result_image, (x, y), (x + w, y + h), (0, 255, 0), 2)
+        # 輪郭の面積を計算
+        area = cv2.contourArea(contour)
+        if area > min_contour_area:
+            x, y, w, h = cv2.boundingRect(contour)
+            cv2.rectangle(result_image, (x, y), (x + w, y + h), (0, 255, 0), 2)
+    
+    # フィルタリング後の輪郭を再取得
+    filtered_contours, _ = cv2.findContours(binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_TC89_L1)
     
     # 虫の数を数える
-    insect_count = len(contours)
+    insect_count = len(filtered_contours)
     
     return result_image, insect_count
+
 
 def main():
     st.title("昆虫数を数えるアプリ")
