@@ -7,11 +7,8 @@ def count_insects(image):
     # グレースケールに変換
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
-    # 画像の平滑化（ガウシアンブラー）
-    blurred = cv2.GaussianBlur(gray, (5, 5), 0)
-
     # 適応的閾値処理
-    binary = cv2.adaptiveThreshold(blurred, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY_INV, 11, 4)
+    binary = cv2.adaptiveThreshold(140, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY_INV, 11, 4)
 
     st.image(binary, caption='閾値処理された画像', use_column_width=True)
 
