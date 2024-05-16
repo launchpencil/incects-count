@@ -1,11 +1,9 @@
 import streamlit as st
 import cv2
 import numpy as np
+from io import BytesIO
 
-def count_insects(image_path):
-    # 画像を読み込む
-    image = cv2.imread(image_path)
-    
+def count_insects(image):
     # グレースケールに変換
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     
@@ -31,7 +29,8 @@ def main():
     uploaded_file = st.file_uploader("画像ファイルをアップロードしてください", type=["jpg", "jpeg", "png"])
     
     if uploaded_file is not None:
-        image = cv2.imdecode(np.fromstring(uploaded_file.read(), np.uint8), 1)
+        image = np.array(bytearray(uploaded_file.read()), dtype=np.uint8)
+        image = cv2.imdecode(image, cv2.IMREAD_COLOR)
         st.image(image, caption='アップロードされた画像', use_column_width=True)
         result_image, insect_count = count_insects(image)
         st.image(result_image, caption='結果画像', use_column_width=True)
