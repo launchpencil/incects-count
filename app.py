@@ -26,7 +26,7 @@ def count_insects(image, min_contour_area=200):
     filtered_contours, _ = cv2.findContours(binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_TC89_L1)
     
     # 虫の数を数える
-    insect_count = len(filtered_contours)
+    insect_count = len(contours)
     
     return result_image, insect_count
 
