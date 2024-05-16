@@ -2,7 +2,7 @@ import streamlit as st
 import cv2
 import numpy as np
 
-def count_insects(image, min_contour_area=200):
+def count_insects(image, min_contour_area=200, max_aspect_ratio=3.0, min_aspect_ratio=0.3):
     # グレースケールに変換
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     
@@ -23,8 +23,10 @@ def count_insects(image, min_contour_area=200):
         if min_contour_area < area:
             # 楕円を近似して描画
             ellipse = cv2.fitEllipse(contour)
-            cv2.ellipse(result_image, ellipse, (0, 255, 0), 2)
-            insect_count += 1
+            aspect_ratio = ellipse[1][0] / ellipse[1][1]  # アスペクト比を計算
+            if min_aspect_ratio < aspect_ratio < max_aspect_ratio:
+                cv2.ellipse(result_image, ellipse, (0, 255, 0), 2)
+                insect_count += 1
     
     return result_image, insect_count
 
