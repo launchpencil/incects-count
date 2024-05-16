@@ -49,7 +49,7 @@ def merge_boxes(boxes, overlap_threshold=0.2):
         x1, y1, x2, y2 = box
         found_overlap = False
         # ボックスを縮小
-        margin = 10  # 任意のマージンを設定
+        margin = 5  # 任意のマージンを設定
         x1 -= margin
         y1 -= margin
         x2 += margin
