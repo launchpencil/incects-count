@@ -21,20 +21,25 @@ def count_insects(image, min_contour_area=200):
     for contour in contours:
         area = cv2.contourArea(contour)
         if min_contour_area < area:
-            x, y, w, h = cv2.boundingRect(contour)
-            bounding_boxes.append((x, y, x + w, y + h))
+            # 楕円近似を行う
+            ellipse = cv2.fitEllipse(contour)
+            (x, y), (major_axis, minor_axis), angle = ellipse
+            bounding_boxes.append((x, y, major_axis, minor_axis, angle))
     
     # 重複するボックスを結合
     merged_boxes = merge_boxes(bounding_boxes)
     
     # 結合されたボックスを描画
     for box in merged_boxes:
-        x1, y1, x2, y2 = box
-        cv2.rectangle(result_image, (x1, y1), (x2, y2), (0, 255, 0), 2)
-        cv2.putText(result_image, f'{x2 - x1}x{y2 - y1}', (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+        x, y, major_axis, minor_axis, angle = box
+        rect = cv2.minAreaRect(((x, y), (major_axis, minor_axis), angle))
+        box_points = cv2.boxPoints(rect).astype(int)
+        cv2.drawContours(result_image, [box_points], 0, (0, 255, 0), 2)
+        cv2.putText(result_image, f'{major_axis}x{minor_axis}', (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
         insect_count += 1
     
     return result_image, insect_count
+
 
 def merge_boxes(boxes, area_threshold=0.2):
     # Sort boxes based on area in descending order
