@@ -2,10 +2,6 @@ import streamlit as st
 import cv2
 import numpy as np
 
-def adjust_rect(rect, margin=5):
-    x, y, w, h = rect
-    return (x + margin, y + margin, w - 2 * margin, h - 2 * margin)
-
 def count_insects(image, min_contour_area=200):
     # グレースケールに変換
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
@@ -26,8 +22,7 @@ def count_insects(image, min_contour_area=200):
         area = cv2.contourArea(contour)
         if min_contour_area < area:
             x, y, w, h = cv2.boundingRect(contour)
-            adjusted_rect = adjust_rect((x, y, w, h))
-            bounding_boxes.append(adjusted_rect)
+            bounding_boxes.append((x, y, x + w, y + h))
     
     # 重複するボックスを結合
     merged_boxes = merge_boxes(bounding_boxes)
