@@ -21,15 +21,16 @@ def count_insects(image, min_contour_area=200):
     for contour in contours:
         area = cv2.contourArea(contour)
         if min_contour_area < area:
-            ellipse = cv2.fitEllipse(contour)  # 楕円をフィット
-            bounding_boxes.append(ellipse)  # 楕円情報を追加
-    
-    # 結合されたボックスを描画
-    for ellipse in bounding_boxes:
-        cv2.ellipse(result_image, ellipse, (0, 255, 0), 2)  # 楕円を描画
-        insect_count += 1
+            x, y, w, h = cv2.boundingRect(contour)
+            bounding_boxes.append((x, y, x + w, y + h))
+            # 輪郭を描画（追加）
+            cv2.drawContours(result_image, [contour], -1, (0, 255, 0), 2)
+            cv2.putText(result_image, f'{w}x{h}', (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+            insect_count += 1
     
     return result_image, insect_count
+
+# merge_boxes, overlap_ratio などの関数はそのまま利用します
 
 def main():
     st.title("昆虫カウンター")
